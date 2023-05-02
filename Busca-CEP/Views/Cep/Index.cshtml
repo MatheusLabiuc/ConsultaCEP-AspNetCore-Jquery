@@ -1,0 +1,94 @@
+﻿<h1>Consulta de endereço por CEP</h1>
+<br />
+<br />
+
+<form id="formulario" action="">
+    CEP:<br />
+    <input class="input-sm w-25 form-control" type="text" name="cep" value="" style="box-shadow:none" />
+    <br />
+        Endereço:
+        <br />
+    <input fieldset disabled class="input-sm w-25 form-control" type="text" name="endereco" value="" style="box-shadow:none" />
+        <br />
+        Bairro:
+        <br />
+    <input fieldset disabled class="input-sm w-25 form-control" type="text" name="bairro" value="" style="box-shadow:none" />
+        <br />
+        Cidade:
+        <br />
+    <input fieldset disabled class="input-sm w-25 form-control" type="text" name="cidade" value="" style="box-shadow:none" />
+        <br />
+        Estado:
+        <br />
+    <input fieldset disabled class="input-sm w-25 form-control" type="text" name="estado" value="" style="box-shadow:none" />
+        <br />
+        Número:
+        <br />
+        <input class="input-sm w-25 form-control" type="text" name="numero" value="" style="box-shadow:none" />
+        <br />
+</form>
+
+<script src="@Url.Content("~/lib/jquery/jquery.js")" type="text/javascript"></script>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            //limpa campos do formulário
+            function limpaFormulario() {
+                $("input[name='cep']").val("");
+                $("input[name = 'endereco']").val("");
+                $("input[name = 'bairro']").val("");
+                $("input[name = 'cidade']").val("");
+                $("input[name = 'estado']").val("");
+            }
+
+            //quando o campo cep perde o foco
+
+            $("input[name='cep']").blur(function () {
+                //Nova variável "cep" somente com digitos
+
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Expressão regular para validar o CEP.
+                if (cep != "") {
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if (validacep.test(cep)) {
+                        //Preenche os campos com "..." enquanto consulta webservice.
+
+                        $("input[name='endereco']").val("...");
+                        $("input[name='bairro']").val("...");
+                        $("input[name='cidade']").val("...");
+                        $("input[name='estado']").val("...");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON("https://viacep.com.br/ws/" + cep + "/json/?callback=?", function (dados) {
+                            if (!("erro" in dados)) {
+                                //atualiza os campos com os valores da consulta
+                                $("input[name = 'endereco']").val(dados.logradouro);
+                                $("input[name = 'bairro']").val(dados.bairro);
+                                $("input[name = 'cidade']").val(dados.localidade);
+                                $("input[name = 'estado']").val(dados.uf);
+
+
+
+                            } else {
+                                //cep pesquisado não encontrado
+                                limpaFormulario();
+                                alert("CEP não foi encontrado");
+                            }
+                        });
+                    } else {
+                        limpaFormulario();
+                        alert("Formato de CEP inválido");
+                    }
+                } else {
+                    limpaFormulario();
+                }
+            });
+        });
+
+    </script>
+}
